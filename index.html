@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematical Sacrifice</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cinzel', 'Times New Roman', serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c0c1d 0%, #1a1a2e 100%);
+            color: #e6e6e6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Background elements */
+        .floating-math {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.1;
+            color: #e94560;
+            z-index: -1;
+            animation: float 20s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0) translateX(0) rotate(0deg); }
+            100% { transform: translateY(-100vh) translateX(100px) rotate(360deg); }
+        }
+        
+        .game-container {
+            width: 100%;
+            max-width: 900px;
+            background: rgba(10, 10, 30, 0.85);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 30px rgba(233, 69, 96, 0.3);
+            overflow: hidden;
+            border: 1px solid #2a2a4a;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .game-header {
+            background: linear-gradient(90deg, #0f3460 0%, #1a1a2e 100%);
+            padding: 25px;
+            text-align: center;
+            border-bottom: 2px solid #533483;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .game-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" opacity="0.1"><path d="M20,20 L80,20 L80,80 L20,80 Z" fill="none" stroke="white" stroke-width="2"/><path d="M30,30 L70,30 L70,70 L30,70 Z" fill="none" stroke="white" stroke-width="1"/><circle cx="50" cy="50" r="15" fill="none" stroke="white" stroke-width="1"/></svg>');
+            opacity: 0.1;
+        }
+        
+        .game-title {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            color: #e94560;
+            text-shadow: 0 0 15px rgba(233, 69, 96, 0.7);
+            letter-spacing: 2px;
+            position: relative;
+        }
+        
+        .game-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            font-style: italic;
+        }
+        
+        .game-content {
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(42, 42, 74, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #533483;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .status-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(233, 69, 96, 0.1) 50%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .status-item {
+            text-align: center;
+            flex: 1;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .status-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #e94560;
+            text-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .status-value.changing {
+            animation: pulse 0.5s ease;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        
+        .status-label {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .narrative {
+            background: rgba(15, 52, 96, 0.3);
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #e94560;
+            line-height: 1.6;
+            font-size: 1.1rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .narrative::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e94560, transparent);
+        }
+        
+        .sacrifice-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        
+        .sacrifice-option {
+            background: rgba(83, 52, 131, 0.3);
+            border: 2px solid #533483;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .sacrifice-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, transparent 30%, rgba(233, 69, 96, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .sacrifice-option:hover {
+            background: rgba(83, 52, 131, 0.5);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .sacrifice-option:hover::before {
+            opacity: 1;
+        }
+        
+        .sacrifice-option.selected {
+            background: rgba(233, 69, 96, 0.2);
+            border-color: #e94560;
+            box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+        }
+        
+        .sacrifice-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #e94560;
+        }
+        
+        .sacrifice-cost {
+            font-size: 1.3rem;
+            color: #e94560;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        
+        .math-problem {
+            background: rgba(42, 42, 74, 0.5);
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.5rem;
+            border: 1px solid #533483;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .math-problem::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" opacity="0.05"><text x="50" y="50" font-family="monospace" font-size="10" fill="white" text-anchor="middle" dominant-baseline="middle">MATH</text></svg>');
+        }
+        
+        .answer-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #533483;
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .answer-input:focus {
+            outline: none;
+            border-color: #e94560;
+            box-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
+        }
+        
+        .game-buttons {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 18px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(90deg, #e94560 0%, #c53d54 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(233, 69, 96, 0.4);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(90deg, #ff5470 0%, #e94560 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(233, 69, 96, 0.6);
+        }
+        
+        .btn-secondary {
+            background: rgba(83, 52, 131, 0.5);
+            color: white;
+            border: 2px solid #533483;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(83, 52, 131, 0.8);
+            transform: translateY(-3px);
+        }
+        
+        .btn-disabled {
+            background: rgba(100, 100, 100, 0.5);
+            color: rgba(255, 255, 255, 0.5);
+            cursor: not-allowed;
+        }
+        
+        .game-screen {
+            display: none;
+        }
+        
+        .active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .sacrifice-history {
+            background: rgba(15, 52, 96, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid rgba(83, 52, 131, 0.5);
+        }
+        
+        .history-title {
+            margin-bottom: 10px;
+            color: #e94560;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+        
+        .history-item {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+        }
+        
+        .event-log {
+            background: rgba(15, 52, 96, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+            margin-top: 10px;
+            border: 1px solid rgba(83, 52, 131, 0.5);
+        }
+        
+        .event-item {
+            padding: 8px 0;
+            color: #4cc9f0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+        }
+        
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            z-index: 100;
+        }
+        
+        .screen-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .damage-effect {
+            background: radial-gradient(circle, rgba(233, 69, 96, 0.3) 0%, transparent 70%);
+        }
+        
+        .heal-effect {
+            background: radial-gradient(circle, rgba(76, 201, 240, 0.3) 0%, transparent 70%);
+        }
+        
+        .win-effect {
+            background: radial-gradient(circle, rgba(123, 220, 181, 0.4) 0%, transparent 70%);
+        }
+        
+        .lose-effect {
+            background: radial-gradient(circle, rgba(100, 100, 100, 0.5) 0%, transparent 70%);
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #e94560;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .sacrifice-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .status-bar {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .game-buttons {
+                flex-direction: column;
+            }
+            
+            .game-title {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Screen Effects -->
+    <div id="damage-effect" class="screen-effect damage-effect"></div>
+    <div id="heal-effect" class="screen-effect heal-effect"></div>
+    <div id="win-effect" class="screen-effect win-effect"></div>
+    <div id="lose-effect" class="screen-effect lose-effect"></div>
+    
+    <!-- Floating Math Symbols -->
+    <div class="floating-math" style="top: 10%; left: 5%;">π</div>
+    <div class="floating-math" style="top: 20%; left: 90%;">∞</div>
+    <div class="floating-math" style="top: 50%; left: 15%;">∑</div>
+    <div class="floating-math" style="top: 70%; left: 80%;">∫</div>
+    <div class="floating-math" style="top: 90%; left: 10%;">Δ</div>
+    <div class="floating-math" style="top: 30%; left: 70%;">√</div>
+    
+    <div class="game-container">
+        <div class="game-header">
+            <h1 class="game-title">Mathematical Sacrifice</h1>
+            <p class="game-subtitle">Where every step forward demands a price</p>
+        </div>
+        
+        <div class="game-content">
+            <!-- Start Screen -->
+            <div id="start-screen" class="game-screen active">
+                <div class="narrative">
+                    <p>In a world ruled by logic and numbers, every step forward demands a sacrifice. You stand at the edge of a realm where mistakes carry a heavy price, and only the sharpest minds survive.</p>
+                    <p>The path ahead is guarded by riddles of mathematics—each question a test, each answer a choice. To succeed, you must be willing to give something up: time, energy, or even your last chance.</p>
+                    <p>Will you solve the problems and move closer to freedom, or fall into the silence of defeat? The game begins now—make your sacrifices wisely.</p>
+                </div>
+                <div class="game-buttons">
+                    <button id="start-btn" class="btn btn-primary">Begin Your Journey</button>
+                </div>
+            </div>
+            
+            <!-- Game Screen -->
+            <div id="game-screen" class="game-screen">
+                <div class="status-bar">
+                    <div class="status-item">
+                        <div class="status-value" id="level-value">1</div>
+                        <div class="status-label">LEVEL</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-value" id="energy-value">100</div>
+                        <div class="status-label">ENERGY</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-value" id="time-value">120</div>
+                        <div class="status-label">MINUTES LEFT</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-value" id="chances-value">3</div>
+                        <div class="status-label">CHANCES</div>
+                    </div>
+                </div>
+                
+                <div class="narrative" id="narrative-text">
+                    You stand before the gateway to Level 2. A mysterious figure emerges from the shadows...
+                </div>
+                
+                <div class="sacrifice-options" id="sacrifice-options">
+                    <div class="sacrifice-option" data-type="energy">
+                        <div class="sacrifice-icon">⚡</div>
+                        <h3>Energy Sacrifice</h3>
+                        <div class="sacrifice-cost">-15 Energy</div>
+                        <p>Your vitality decreases but your mind focuses</p>
+                    </div>
+                    <div class="sacrifice-option" data-type="time">
+                        <div class="sacrifice-icon">⏳</div>
+                        <h3>Time Sacrifice</h3>
+                        <div class="sacrifice-cost">-10 Minutes</div>
+                        <p>Time accelerates but your perception sharpens</p>
+                    </div>
+                    <div class="sacrifice-option" data-type="chance">
+                        <div class="sacrifice-icon">🎲</div>
+                        <h3>Chance Sacrifice</h3>
+                        <div class="sacrifice-cost">-1 Chance</div>
+                        <p>Risk everything for greater clarity</p>
+                    </div>
+                </div>
+                
+                <div class="math-problem">
+                    <div id="problem-text">Choose your sacrifice to reveal the problem</div>
+                    <input type="text" id="answer-input" class="answer-input" placeholder="Enter your answer...">
+                </div>
+                
+                <div class="game-buttons">
+                    <button id="submit-btn" class="btn btn-primary">Submit Answer</button>
+                    <button id="hint-btn" class="btn btn-secondary">Request Hint (-5 Energy)</button>
+                    <button id="skip-btn" class="btn btn-secondary">Skip Problem (-10 Energy)</button>
+                </div>
+                
+                <div class="sacrifice-history">
+                    <h3 class="history-title">Sacrifices Made</h3>
+                    <div id="history-list"></div>
+                </div>
+                
+                <div class="event-log">
+                    <h3 class="history-title">Recent Events</h3>
+                    <div id="event-list"></div>
+                </div>
+            </div>
+            
+            <!-- Game Over Screen -->
+            <div id="gameover-screen" class="game-screen">
+                <div class="narrative">
+                    <h2 id="gameover-title">Game Over</h2>
+                    <p id="gameover-text">You have reached the end of your journey.</p>
+                    <div id="final-stats"></div>
+                </div>
+                <div class="game-buttons">
+                    <button id="restart-btn" class="btn btn-primary">Play Again</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        const gameState = {
+            level: 1,
+            energy: 100,
+            time: 120,
+            chances: 3,
+            selectedSacrifice: null,
+            currentProblem: null,
+            currentAnswer: null,
+            sacrificesMade: [],
+            events: [],
+            gameOver: false
+        };
+
+        // DOM Elements
+        const startScreen = document.getElementById('start-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const gameoverScreen = document.getElementById('gameover-screen');
+        
+        const levelValue = document.getElementById('level-value');
+        const energyValue = document.getElementById('energy-value');
+        const timeValue = document.getElementById('time-value');
+        const chancesValue = document.getElementById('chances-value');
+        
+        const narrativeText = document.getElementById('narrative-text');
+        const problemText = document.getElementById('problem-text');
+        const answerInput = document.getElementById('answer-input');
+        const historyList = document.getElementById('history-list');
+        const eventList = document.getElementById('event-list');
+        
+        const startBtn = document.getElementById('start-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const hintBtn = document.getElementById('hint-btn');
+        const skipBtn = document.getElementById('skip-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        
+        const sacrificeOptions = document.querySelectorAll('.sacrifice-option');
+        
+        // Screen effects
+        const damageEffect = document.getElementById('damage-effect');
+        const healEffect = document.getElementById('heal-effect');
+        const winEffect = document.getElementById('win-effect');
+        const loseEffect = document.getElementById('lose-effect');
+        
+        // Math problem database
+        const mathProblems = [
+            {
+                problem: "If a train travels 60 miles per hour, how far will it travel in 2.5 hours?",
+                answer: "150",
+                explanation: "Distance = Speed × Time = 60 × 2.5 = 150 miles"
+            },
+            {
+                problem: "A rectangular garden is 12 feet long and 8 feet wide. What is its area?",
+                answer: "96",
+                explanation: "Area = Length × Width = 12 × 8 = 96 square feet"
+            },
+            {
+                problem: "If 3 apples cost $1.50, how much would 10 apples cost?",
+                answer: "5",
+                explanation: "Cost per apple = $1.50 ÷ 3 = $0.50. 10 apples = 10 × $0.50 = $5.00"
+            },
+            {
+                problem: "What is 25% of 80?",
+                answer: "20",
+                explanation: "25% of 80 = 0.25 × 80 = 20"
+            },
+            {
+                problem: "A recipe calls for 2 cups of flour for every 3 cups of sugar. How much flour is needed for 9 cups of sugar?",
+                answer: "6",
+                explanation: "Ratio is 2:3, so for 9 cups of sugar (3×3), we need 2×3 = 6 cups of flour"
+            },
+            {
+                problem: "If x + 7 = 15, what is the value of x?",
+                answer: "8",
+                explanation: "x = 15 - 7 = 8"
+            },
+            {
+                problem: "A triangle has a base of 10 cm and a height of 6 cm. What is its area?",
+                answer: "30",
+                explanation: "Area = ½ × base × height = ½ × 10 × 6 = 30 cm²"
+            },
+            {
+                problem: "What is the next number in the sequence: 2, 4, 8, 16, ...?",
+                answer: "32",
+                explanation: "Each number is multiplied by 2: 2×2=4, 4×2=8, 8×2=16, 16×2=32"
+            },
+            {
+                problem: "If a car uses 5 gallons of gas to travel 150 miles, how many gallons would it need to travel 450 miles?",
+                answer: "15",
+                explanation: "Miles per gallon = 150 ÷ 5 = 30 mpg. For 450 miles: 450 ÷ 30 = 15 gallons"
+            },
+            {
+                problem: "Simplify: 3(4 + 2) - 5",
+                answer: "13",
+                explanation: "3(6) - 5 = 18 - 5 = 13"
+            }
+        ];
+
+        // Visual effect functions
+        function createParticles(x, y, count, color) {
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                particle.style.width = Math.random() * 8 + 4 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.backgroundColor = color;
+                particle.style.borderRadius = '50%';
+                document.body.appendChild(particle);
+                
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 3 + 2;
+                const vx = Math.cos(angle) * speed;
+                const vy = Math.sin(angle) * speed;
+                
+                let opacity = 1;
+                const animate = () => {
+                    opacity -= 0.02;
+                    if (opacity <= 0) {
+                        document.body.removeChild(particle);
+                        return;
+                    }
+                    
+                    particle.style.opacity = opacity;
+                    particle.style.left = parseFloat(particle.style.left) + vx + 'px';
+                    particle.style.top = parseFloat(particle.style.top) + vy + 'px';
+                    
+                    requestAnimationFrame(animate);
+                };
+                
+                animate();
+            }
+        }
+        
+        function showScreenEffect(effect, duration = 600) {
+            effect.style.opacity = '1';
+            setTimeout(() => {
+                effect.style.opacity = '0';
+            }, duration);
+        }
+        
+        function animateValueChange(element, newValue) {
+            element.classList.add('changing');
+            setTimeout(() => {
+                element.textContent = newValue;
+                setTimeout(() => {
+                    element.classList.remove('changing');
+                }, 300);
+            }, 150);
+        }
+        
+        // Game functions
+        function fetchMathProblem(difficulty) {
+            // Filter problems by difficulty
+            let filteredProblems;
+            if (difficulty === 1) {
+                filteredProblems = mathProblems.filter(p => 
+                    !p.problem.includes('%') && 
+                    !p.problem.includes('average')
+                );
+            } else if (difficulty === 2) {
+                filteredProblems = mathProblems.filter(p => 
+                    p.problem.includes('%') || 
+                    p.problem.includes('average')
+                );
+            } else {
+                filteredProblems = mathProblems;
+            }
+            
+            // Select a random problem
+            const randomIndex = Math.floor(Math.random() * filteredProblems.length);
+            return filteredProblems[randomIndex];
+        }
+        
+        function applySacrifice(type) {
+            let cost, narrative;
+            
+            switch(type) {
+                case 'energy':
+                    cost = 15;
+                    narrative = "You feel your vitality draining away as you make the sacrifice. The numbers before you seem sharper, clearer.";
+                    break;
+                case 'time':
+                    cost = 10;
+                    narrative = "Time seems to warp around you. Minutes slip away, but your mind accelerates.";
+                    break;
+                case 'chance':
+                    cost = 1;
+                    narrative = "You gamble with fate itself. The stakes are higher, but your focus is absolute.";
+                    break;
+            }
+            
+            // Apply cost with visual effect
+            if (type === 'energy') {
+                gameState.energy -= cost;
+                animateValueChange(energyValue, gameState.energy);
+                showScreenEffect(damageEffect);
+                createParticles(energyValue.getBoundingClientRect().left + 20, energyValue.getBoundingClientRect().top + 20, 10, '#e94560');
+            }
+            if (type === 'time') {
+                gameState.time -= cost;
+                animateValueChange(timeValue, gameState.time);
+                showScreenEffect(damageEffect);
+                createParticles(timeValue.getBoundingClientRect().left + 20, timeValue.getBoundingClientRect().top + 20, 10, '#e94560');
+            }
+            if (type === 'chance') {
+                gameState.chances -= cost;
+                animateValueChange(chancesValue, gameState.chances);
+                showScreenEffect(damageEffect);
+                createParticles(chancesValue.getBoundingClientRect().left + 20, chancesValue.getBoundingClientRect().top + 20, 10, '#e94560');
+            }
+            
+            // Record sacrifice
+            gameState.sacrificesMade.push(`Level ${gameState.level}: Sacrificed ${cost} ${type}`);
+            
+            // Generate problem based on level
+            const difficulty = Math.min(Math.ceil(gameState.level / 3), 3);
+            gameState.currentProblem = fetchMathProblem(difficulty);
+            
+            // Update narrative and problem
+            narrativeText.textContent = narrative;
+            problemText.textContent = gameState.currentProblem.problem;
+            
+            // Clear answer input and focus
+            answerInput.value = '';
+            answerInput.focus();
+            
+            updateDisplay();
+        }
+        
+        function checkAnswer() {
+            if (!gameState.currentProblem) return;
+            
+            const playerAnswer = answerInput.value.trim().toLowerCase();
+            const correctAnswer = gameState.currentProblem.answer.toLowerCase();
+            
+            // Normalize answers for comparison
+            const normalizeAnswer = (ans) => {
+                return ans.replace(/\s+/g, '') // Remove spaces
+                         .replace('$', '')     // Remove dollar signs
+                         .replace('cm²', '')   // Remove units
+                         .replace('°', '');    // Remove degree symbols
+            };
+            
+            const normalizedPlayer = normalizeAnswer(playerAnswer);
+            const normalizedCorrect = normalizeAnswer(correctAnswer);
+            
+            // Check if answer is correct
+            let isCorrect = false;
+            if (!isNaN(normalizedPlayer) && !isNaN(normalizedCorrect)) {
+                isCorrect = Math.abs(parseFloat(normalizedPlayer) - parseFloat(normalizedCorrect)) < 0.01;
+            } else {
+                isCorrect = normalizedPlayer === normalizedCorrect;
+            }
+            
+            if (isCorrect) {
+                // Correct answer
+                showScreenEffect(healEffect);
+                createParticles(submitBtn.getBoundingClientRect().left + 50, submitBtn.getBoundingClientRect().top + 10, 15, '#4cc9f0');
+                
+                addEvent("Correct! The path forward opens...");
+                addEvent(`Explanation: ${gameState.currentProblem.explanation}`);
+                gameState.level++;
+                animateValueChange(levelValue, gameState.level);
+                
+                // Small reward based on sacrifice type
+                if (gameState.selectedSacrifice === 'energy') {
+                    gameState.energy += 5;
+                    animateValueChange(energyValue, gameState.energy);
+                    addEvent("+5 Energy restored from your sacrifice");
+                } else if (gameState.selectedSacrifice === 'time') {
+                    gameState.time += 2;
+                    animateValueChange(timeValue, gameState.time);
+                    addEvent("+2 Minutes regained from temporal resonance");
+                }
+                
+                // Check for win condition
+                if (gameState.level > 5) { // Reduced for demo purposes
+                    endGame(true);
+                    return;
+                }
+                
+                // Reset for next level
+                resetProblem();
+            } else {
+                // Wrong answer
+                showScreenEffect(damageEffect);
+                createParticles(submitBtn.getBoundingClientRect().left + 50, submitBtn.getBoundingClientRect().top + 10, 15, '#e94560');
+                
+                addEvent(`Incorrect! The correct answer was ${gameState.currentProblem.answer}`);
+                addEvent(`Explanation: ${gameState.currentProblem.explanation}`);
+                gameState.chances--;
+                animateValueChange(chancesValue, gameState.chances);
+                
+                if (gameState.chances <= 0) {
+                    endGame(false);
+                    return;
+                }
+                
+                // Keep the same problem but allow another attempt
+                addEvent("Try again. The figure watches impatiently...");
+            }
+            
+            updateDisplay();
+        }
+        
+        function skipProblem() {
+            if (gameState.energy < 10) {
+                addEvent("Not enough energy to skip this problem!");
+                return;
+            }
+            
+            gameState.energy -= 10;
+            animateValueChange(energyValue, gameState.energy);
+            showScreenEffect(damageEffect);
+            addEvent("-10 Energy to skip the problem");
+            addEvent(`The answer was: ${gameState.currentProblem.answer}`);
+            
+            // Move to next level but with a penalty
+            gameState.level++;
+            
+            // Check for win condition
+            if (gameState.level > 5) {
+                endGame(true);
+                return;
+            }
+            
+            resetProblem();
+            updateDisplay();
+        }
+        
+        function provideHint() {
+            if (gameState.energy < 5) {
+                addEvent("Not enough energy for a hint!");
+                return;
+            }
+            
+            if (!gameState.currentProblem) {
+                addEvent("No problem to hint at!");
+                return;
+            }
+            
+            gameState.energy -= 5;
+            animateValueChange(energyValue, gameState.energy);
+            showScreenEffect(damageEffect);
+            addEvent("-5 Energy for a hint");
+            
+            // Provide a hint based on the problem type
+            const problem = gameState.currentProblem.problem;
+            let hint = "";
+            
+            if (problem.includes('%')) {
+                hint = "Remember: percentage means 'per hundred'. To find X% of Y, multiply Y by X/100.";
+            } else if (problem.includes('average')) {
+                hint = "Average = Sum of all values ÷ Number of values";
+            } else if (problem.includes('area')) {
+                hint = "Area formulas: Rectangle = length × width, Triangle = ½ × base × height";
+            } else if (problem.includes('volume')) {
+                hint = "Volume = length × width × height for rectangular prisms";
+            } else if (problem.includes('ratio') || problem.includes('every')) {
+                hint = "Find the unit rate first, then scale it up.";
+            } else if (problem.includes('sequence')) {
+                hint = "Look for a pattern: is it adding, multiplying, or following another rule?";
+            } else {
+                hint = "Break the problem down into smaller steps. What information are you given?";
+            }
+            
+            addEvent(`Hint: ${hint}`);
+            updateDisplay();
+        }
+        
+        function randomEvent() {
+            // 25% chance of a random event
+            if (Math.random() < 0.25) {
+                const eventType = Math.floor(Math.random() * 4);
+                
+                switch(eventType) {
+                    case 0:
+                        // Energy boost
+                        const energyGain = Math.floor(Math.random() * 11) + 5;
+                        gameState.energy = Math.min(100, gameState.energy + energyGain);
+                        animateValueChange(energyValue, gameState.energy);
+                        showScreenEffect(healEffect);
+                        addEvent(`A mysterious energy restores ${energyGain} points!`);
+                        break;
+                    case 1:
+                        // Time bonus
+                        const timeGain = Math.floor(Math.random() * 6) + 5;
+                        gameState.time += timeGain;
+                        animateValueChange(timeValue, gameState.time);
+                        showScreenEffect(healEffect);
+                        addEvent(`Time reverses, granting ${timeGain} extra minutes!`);
+                        break;
+                    case 2:
+                        // Energy drain
+                        const energyLoss = Math.floor(Math.random() * 6) + 5;
+                        gameState.energy -= energyLoss;
+                        animateValueChange(energyValue, gameState.energy);
+                        showScreenEffect(damageEffect);
+                        addEvent(`A shadowy presence drains ${energyLoss} energy!`);
+                        break;
+                    case 3:
+                        // Time loss
+                        const timeLoss = Math.floor(Math.random() * 11) + 5;
+                        gameState.time -= timeLoss;
+                        animateValueChange(timeValue, gameState.time);
+                        showScreenEffect(damageEffect);
+                        addEvent(`Time accelerates, costing ${timeLoss} minutes!`);
+                        break;
+                }
+                
+                updateDisplay();
+                
+                // Check for game over after event
+                if (gameState.energy <= 0 || gameState.time <= 0) {
+                    endGame(false);
+                }
+            }
+        }
+        
+        function resetProblem() {
+            gameState.selectedSacrifice = null;
+            narrativeText.textContent = `You stand before the gateway to Level ${gameState.level + 1}. A mysterious figure emerges from the shadows...`;
+            problemText.textContent = "Choose your sacrifice to reveal the problem";
+            answerInput.value = '';
+            
+            // Reset sacrifice option visuals
+            sacrificeOptions.forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Trigger random event
+            randomEvent();
+        }
+        
+        function endGame(isWin) {
+            gameState.gameOver = true;
+            
+            const gameoverTitle = document.getElementById('gameover-title');
+            const gameoverText = document.getElementById('gameover-text');
+            const finalStats = document.getElementById('final-stats');
+            
+            if (isWin) {
+                gameoverTitle.textContent = "VICTORY!";
+                gameoverText.textContent = "You have conquered the realm of mathematical sacrifice! Your intellect and strategic sacrifices have led you to freedom.";
+                showScreenEffect(winEffect, 2000);
+            } else {
+                gameoverTitle.textContent = "DEFEAT";
+                if (gameState.energy <= 0) {
+                    gameoverText.textContent = "Your energy has been completely drained. The realm claims you as its own.";
+                } else if (gameState.time <= 0) {
+                    gameoverText.textContent = "Time has run out. You are trapped forever in this mathematical prison.";
+                } else {
+                    gameoverText.textContent = "You have exhausted all your chances. The silent defeat envelops you.";
+                }
+                showScreenEffect(loseEffect, 2000);
+            }
+            
+            finalStats.innerHTML = `
+                <p>Final Level: ${gameState.level}</p>
+                <p>Energy Remaining: ${gameState.energy}</p>
+                <p>Time Remaining: ${gameState.time} minutes</p>
+                <p>Sacrifices Made: ${gameState.sacrificesMade.length}</p>
+            `;
+            
+            // Show game over screen
+            gameScreen.classList.remove('active');
+            gameoverScreen.classList.add('active');
+        }
+        
+        function updateDisplay() {
+            levelValue.textContent = gameState.level;
+            energyValue.textContent = gameState.energy;
+            timeValue.textContent = gameState.time;
+            chancesValue.textContent = gameState.chances;
+            
+            // Update button states
+            skipBtn.disabled = gameState.energy < 10;
+            skipBtn.className = gameState.energy < 10 ? 'btn btn-disabled' : 'btn btn-secondary';
+            
+            hintBtn.disabled = gameState.energy < 5 || !gameState.currentProblem;
+            hintBtn.className = (gameState.energy < 5 || !gameState.currentProblem) ? 'btn btn-disabled' : 'btn btn-secondary';
+            
+            // Update history
+            historyList.innerHTML = '';
+            gameState.sacrificesMade.slice(-5).forEach(sacrifice => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.textContent = sacrifice;
+                historyList.appendChild(item);
+            });
+            
+            // Update events
+            eventList.innerHTML = '';
+            gameState.events.slice(-5).forEach(event => {
+                const item = document.createElement('div');
+                item.className = 'event-item';
+                item.textContent = event;
+                eventList.appendChild(item);
+            });
+        }
+        
+        function addEvent(text) {
+            gameState.events.push(text);
+            if (gameState.events.length > 10) {
+                gameState.events.shift();
+            }
+            updateDisplay();
+        }
+        
+        function resetGame() {
+            gameState.level = 1;
+            gameState.energy = 100;
+            gameState.time = 120;
+            gameState.chances = 3;
+            gameState.selectedSacrifice = null;
+            gameState.currentProblem = null;
+            gameState.currentAnswer = null;
+            gameState.sacrificesMade = [];
+            gameState.events = [];
+            gameState.gameOver = false;
+            
+            resetProblem();
+            updateDisplay();
+            
+            // Show game screen
+            startScreen.classList.remove('active');
+            gameoverScreen.classList.remove('active');
+            gameScreen.classList.add('active');
+        }
+        
+        // Event listeners
+        startBtn.addEventListener('click', () => {
+            startScreen.classList.remove('active');
+            gameScreen.classList.add('active');
+            resetProblem();
+            updateDisplay();
+        });
+        
+        restartBtn.addEventListener('click', resetGame);
+        
+        sacrificeOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                // Deselect all options
+                sacrificeOptions.forEach(opt => opt.classList.remove('selected'));
+                
+                // Select clicked option
+                option.classList.add('selected');
+                
+                // Set selected sacrifice
+                gameState.selectedSacrifice = option.dataset.type;
+                
+                // Apply sacrifice
+                applySacrifice(gameState.selectedSacrifice);
+            });
+        });
+        
+        submitBtn.addEventListener('click', () => {
+            if (!gameState.selectedSacrifice) {
+                addEvent("You must choose a sacrifice first!");
+                return;
+            }
+            
+            if (!answerInput.value) {
+                addEvent("Please enter an answer!");
+                return;
+            }
+            
+            if (!gameState.currentProblem) {
+                addEvent("Problem is still loading...");
+                return;
+            }
+            
+            checkAnswer();
+        });
+        
+        hintBtn.addEventListener('click', provideHint);
+        
+        skipBtn.addEventListener('click', skipProblem);
+        
+        answerInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+        
+        // Initialize display
+        updateDisplay();
+    </script>
+</body>
+</html>
